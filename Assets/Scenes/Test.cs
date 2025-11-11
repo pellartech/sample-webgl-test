@@ -78,12 +78,6 @@ public class TestQL : MonoBehaviour
                 brand: "lamborghini-test",
                 model: "huracan"
             );
-
-            // Test 2: Create UDI with validation (after a delay)
-            StartCoroutine(TestCreateUDI());
-
-            // Test 3: Get UDI by ID (after a delay)
-            StartCoroutine(TestGetUDIById());
         }
         else
         {
@@ -95,8 +89,6 @@ public class TestQL : MonoBehaviour
             Debug.Log("Testing UDI Stats Component...");
             udiStatsComponent.OnUDIStatsReceived += HandleUDIStatsReceived;
             udiStatsComponent.OnUDIStatsError += HandleUDIStatsError;
-
-            udiStatsComponent.GetUDIStats("lamborghini-test", "huracan", 12);
         }
         else
         {
@@ -128,14 +120,14 @@ public class TestQL : MonoBehaviour
         }
     }
 
-    private void HandleGameStudioReceived(GameStudio gameStudio)
+    private void HandleGameStudioReceived(string action, GameStudio gameStudio)
     {
-        Debug.Log("QL DATA: " + gameStudio.ToJson());
+        Debug.Log("QL DATA: " + action + " " + gameStudio.ToJson());
     }
 
-    private void HandleGameEventLogReceived(GameEventLog gameEventLog)
+    private void HandleGameEventLogReceived(string action, GameEventLog gameEventLog)
     {
-        Debug.Log("Game Event Log Received: " + gameEventLog.ToJson());
+        Debug.Log("Game Event Log Received: " + action + " " + gameEventLog.ToJson());
     }
 
     private void HandleGameEventLogError(string error)
@@ -143,9 +135,9 @@ public class TestQL : MonoBehaviour
         Debug.LogError("Game Event Log Error: " + error);
     }
 
-    private void HandleUDIReceivedForFuse(UDI udi)
+    private void HandleUDIReceivedForFuse(string action, UDI udi)
     {
-        Debug.Log("UDI Received for Fuse: " + udi.ToJson());
+        Debug.Log("UDI Received for Fuse: " + action + " " + udi.ToJson());
 
         System.Random random = new System.Random();
 
@@ -169,20 +161,45 @@ public class TestQL : MonoBehaviour
         );
     }
 
-    private void HandleUDIReceived(UDI udi)
+    private void HandleUDIReceived(string action, UDI udi)
     {
-        Debug.Log("UDI Received: " + udi.ToJson());
-        Debug.Log($"UDI Details - ID: {udi.id}, Brand: {udi.GetBrand()}, Model: {udi.GetModel()}");
-        Debug.Log($"UDI Email: {udi.email}, Is Fused: {udi.IsFused()}");
-
-        // Test utility methods
-        if (udiComponent.HasUDI())
+        if (action == udiComponent.ACTION_CREATE_UDI)
         {
-            Debug.Log($"Current UDI ID: {udiComponent.GetCurrentUDIId()}");
-            Debug.Log($"Current Brand: {udiComponent.GetCurrentBrand()}");
-            Debug.Log($"Current Model: {udiComponent.GetCurrentModel()}");
-            Debug.Log($"Current Email: {udiComponent.GetCurrentEmail()}");
-            Debug.Log($"Is Current UDI Fused: {udiComponent.IsCurrentUDIFused()}");
+            Debug.Log("UDI Received: " + action + " " + udi.ToJson());
+            Debug.Log($"UDI Details - ID: {udi.id}, Brand: {udi.GetBrand()}, Model: {udi.GetModel()}");
+            Debug.Log($"UDI Email: {udi.email}, Is Fused: {udi.IsFused()}");
+
+            // Test utility methods
+            if (udiComponent.HasUDI())
+            {
+                Debug.Log($"Current UDI ID: {udiComponent.GetCurrentUDIId()}");
+                Debug.Log($"Current Brand: {udiComponent.GetCurrentBrand()}");
+                Debug.Log($"Current Model: {udiComponent.GetCurrentModel()}");
+                Debug.Log($"Current Email: {udiComponent.GetCurrentEmail()}");
+                Debug.Log($"Is Current UDI Fused: {udiComponent.IsCurrentUDIFused()}");
+
+                udiComponent.GetUDIById(udi.id);
+            }
+        }
+        else if (action == udiComponent.ACTION_GET_UDI_BY_ID)
+        {
+            Debug.Log("UDI Received: " + action + " " + udi.ToJson());
+
+            if (udiComponent.HasUDI())
+            {
+                Debug.Log($"Current UDI ID: {udiComponent.GetCurrentUDIId()}");
+                Debug.Log($"Current Brand: {udiComponent.GetCurrentBrand()}");
+                Debug.Log($"Current Model: {udiComponent.GetCurrentModel()}");
+                Debug.Log($"Current Email: {udiComponent.GetCurrentEmail()}");
+                Debug.Log($"Is Current UDI Fused: {udiComponent.IsCurrentUDIFused()}");
+
+                udiStatsComponent.GetUDIStats(udiComponent.GetCurrentBrand(), udiComponent.GetCurrentModel(), udiComponent.GetCurrentSequentialId());
+            }
+        }
+        else
+        {
+            Debug.LogError("UDI Received: " + action + " " + udi.ToJson());
+            Debug.LogError("Unknown action: " + action);
         }
     }
 
@@ -191,9 +208,9 @@ public class TestQL : MonoBehaviour
         Debug.LogError("UDI Error: " + error);
     }
 
-    private void HandleUDIStatsReceived(UDIStats stats)
+    private void HandleUDIStatsReceived(string action, UDIStats stats)
     {
-        Debug.Log("UDI Stats Received: " + stats.ToJson());
+        Debug.Log("UDI Stats Received: " + action + " " + stats.ToJson());
         Debug.Log($"UDI Stats Details - Brand: {stats.brand}, Model: {stats.model}, Sequential ID: {stats.sequentialId}");
         Debug.Log($"Total Races: {stats.totalRaces}, Total Mileage: {stats.totalMileage}");
         Debug.Log($"Wins: {stats.wins}, Podium Finishes: {stats.podiumFinishes}");
@@ -219,7 +236,7 @@ public class TestQL : MonoBehaviour
         Debug.LogError("UDI Stats Error: " + error);
     }
 
-    private void HandleUDIFuseReceived(UDIFuseResponse response)
+    private void HandleUDIFuseReceived(string action, UDIFuseResponse response)
     {
         Debug.Log("UDI Fuse Received: " + response.ToJson());
         Debug.Log($"UDI Fuse Details - UDI ID: {response.data.udiId}, Token ID: {response.data.tokenId}");
@@ -250,82 +267,5 @@ public class TestQL : MonoBehaviour
     private void HandleUDIFuseError(string error)
     {
         Debug.LogError("UDI Fuse Error: " + error);
-    }
-
-    private IEnumerator TestCreateUDI()
-    {
-        yield return new WaitForSeconds(2f);
-
-        Debug.Log("Test 2: Creating UDI with validation...");
-
-        // Test valid data
-        udiComponent.CreateUDI(
-            email: "test@example.com",
-            brand: "ferrari-test",
-            model: "f40"
-        );
-
-        yield return new WaitForSeconds(2f);
-
-        // Test invalid email
-        Debug.Log("Test 2b: Testing invalid email validation...");
-        udiComponent.CreateUDI(
-            email: "invalid-email",
-            brand: "ferrari-test",
-            model: "f40"
-        );
-
-        yield return new WaitForSeconds(2f);
-
-        // Test short brand
-        Debug.Log("Test 2c: Testing short brand validation...");
-        udiComponent.CreateUDI(
-            email: "test@example.com",
-            brand: null,
-            model: "f40"
-        );
-    }
-
-    private IEnumerator TestGetUDIById()
-    {
-        yield return new WaitForSeconds(5f);
-
-        Debug.Log("Test 3: Getting UDI by ID...");
-
-        // Test with a sample UDI ID (replace with actual ID from previous tests)
-        string sampleUDIId = "0963718a-d9d4-4381-8448-e8b18ac72482";
-        udiComponent.GetUDIById(sampleUDIId);
-
-        yield return new WaitForSeconds(2f);
-
-        // Test with empty ID (should trigger error)
-        Debug.Log("Test 3b: Testing empty UDI ID validation...");
-        udiComponent.GetUDIById("");
-
-        yield return new WaitForSeconds(2f);
-
-        // Test UDI utility methods
-        Debug.Log("Test 3c: Testing UDI utility methods...");
-        TestUDIUtilityMethods();
-    }
-
-    private void TestUDIUtilityMethods()
-    {
-        Debug.Log("=== Testing UDI Utility Methods ===");
-
-        // Test when no UDI is loaded
-        Debug.Log($"Has UDI: {udiComponent.HasUDI()}");
-        Debug.Log($"Current UDI ID: {udiComponent.GetCurrentUDIId()}");
-        Debug.Log($"Current Brand: {udiComponent.GetCurrentBrand()}");
-        Debug.Log($"Current Model: {udiComponent.GetCurrentModel()}");
-        Debug.Log($"Current Email: {udiComponent.GetCurrentEmail()}");
-        Debug.Log($"Is Current UDI Fused: {udiComponent.IsCurrentUDIFused()}");
-
-        // Test clearing UDI
-        Debug.Log("Clearing UDI...");
-        udiComponent.ClearUDI();
-        Debug.Log($"Has UDI after clear: {udiComponent.HasUDI()}");
-
-        Debug.Log("=== UDI Utility Methods Test Complete ===");
     }
 }

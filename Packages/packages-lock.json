@@ -1,11 +1,11 @@
 {
   "dependencies": {
     "com.motoverse.qlplugin": {
-      "version": "https://github.com/pellartech/motoverse-unity-qlplugin.git#v1.1.0",
+      "version": "https://github.com/pellartech/motoverse-unity-qlplugin.git#v1.1.1",
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "8b19c3c260efd5225d36e62105801166e62c2e0c"
+      "hash": "e389b2d30ee0f4fe3c76fd5e7cdb318b09d298c3"
     },
     "com.unity.collab-proxy": {
       "version": "2.8.2",

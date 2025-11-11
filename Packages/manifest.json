@@ -37,6 +37,6 @@
     "com.unity.modules.vr": "1.0.0",
     "com.unity.modules.wind": "1.0.0",
     "com.unity.modules.xr": "1.0.0",
-    "com.motoverse.qlplugin": "https://github.com/pellartech/motoverse-unity-qlplugin.git#v1.1.0"
+    "com.motoverse.qlplugin": "https://github.com/pellartech/motoverse-unity-qlplugin.git#v1.1.1"
   }
 }
